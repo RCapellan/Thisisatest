@@ -1,4 +1,3 @@
 *.tar.gz
 R_libs
 *.png
-.gitlab-ci.yml
