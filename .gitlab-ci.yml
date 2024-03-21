@@ -4,4 +4,5 @@ script:
   - git remote add github https://RCapellan:trqT[?1CPG@github.com/RCapellan/Thisisatest
   - git push github main
 only:
-  - main
+  - main 
+  
