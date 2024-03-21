@@ -1,3 +1,5 @@
+sync_with_github:
+  stage: deploy
 script:
   - git remote add github git@github.com:RCapellan/Thisisatest.git
   - git push github main
