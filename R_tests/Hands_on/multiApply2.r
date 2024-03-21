@@ -3,66 +3,91 @@ library(s2dv)
 library(multiApply)
 
 subtractTwoArrays <- function(x, y) {
-  return (x - y)
+
+  for (i in 1:dim(x)[1]) {
+    x[i, , ] <- x[i, , ] - y
+  }
+
+  return (x)
+}
+
+multiplyTwoArrays <- function(x, y) {
+
+  for (i in 1:dim(x)[1]) {
+    for (j in 1:dim(x)[2]){
+      x[i, j, ] <- x[i, j, ] * y[j, ]
+    }
+  }
+
+  return (x)
+}
+
+averageTwoArrays <- function(x) {
+  
+  return ( rowMeans(x) )
+
 }
 
 
-# Array with dimensions 'time', 'lat', and 'lon'
-arr1 <- array(data = 1:(2*3*4), dim = c(2, 3, 4),
-              dimnames <- list(
-                time = c("time1", "time2"),
-                lat = c("lat1", "lat2", "lat3"),
-                lon = c("lon1", "lon2", "lon3", "lon4")
-            ))
+# Create three arrays with multiple dimenssions
+repos_exp <- paste0('/esarchive/exp/ecearth/a1tr/cmorfiles/CMIP/EC-Earth-Consortium/',
+                    'EC-Earth3/historical/r24i1p1f1/Amon/$var$/gr/v20190312/',
+                    '$var$_Amon_EC-Earth3_historical_r24i1p1f1_gr_$sdate$01-$sdate$12.nc')
 
-# Array with dimensions 'lat' and 'lon'
-arr2 <- array(data = 1:(3*4), dim = c(3, 4),
-              dimnames = list(
-                lat = c("lat1", "lat2", "lat3"),
-                lon = c("lon1", "lon2", "lon3", "lon4")
-            ))
+arr <- Start(dat = repos_exp,
+             var = 'tas',
+             sdate = as.character(c(2005:2008)),
+             time = indices(1:3),
+             lat = 'all',
+             lat_reorder = Sort(),
+             lon = 'all',
+             lon_reorder = CircularSort(0, 360),
+             synonims = list(lat = c('lat', 'latitude'),
+                             lon = c('lon', 'longitude')),
+             return_vars = list(lon = NULL,
+                                lat = NULL,
+                                time = 'sdate'),
+             retrieve = TRUE)
 
-# Array with dimensions 'time' and 'lat'
-arr3 <- array(data = 1:(2*3), dim = c(2, 3),
-              dimnames = list(
-                time = c("time1", "time2"),
-                lat = c("lat1", "lat2", "lat3")
-            ))
-
-# a) Take the second array and subtract it to each time step in the first array.
-
-# subtract_data <- Apply( data = list(arr1, arr2), 
-#                         target_dims = list( c(1: length(dim(arr2))), c(1: length(dim(arr2))) ),
-#                         fun = subtractTwoArrays,
-#                         guess_dim_names = FALSE)$output1
+arr1 <- MeanDims(arr, dims = c('dat', 'var', 'sdate'),         na.rm = TRUE, drop = TRUE)
+arr2 <- MeanDims(arr, dims = c('dat', 'var', 'sdate' ,'time'), na.rm = TRUE, drop = TRUE)
+arr3 <- MeanDims(arr, dims = c('dat', 'var', 'sdate', 'lon'),  na.rm = TRUE, drop = TRUE)
 
 
+# a) Take the second array and subtract it to each time step in the first 
+# array.
+
+subtract_data <- Apply( data = list(arr1, arr2), 
+                        target_dims = list( c('time', 'lat', 'lon'), c('lat', 'lon') ),
+                        fun = subtractTwoArrays,
+                        guess_dim_names = FALSE
+                      )$output1
 
 
-############################################################################
-############################################################################
-############################################################################
-# process_arrays <- function(x, y) {
-#   return (x + y)
-# }
+# b) For each time step in the first array, all values along the 'lon'
+# dimension for each 'lat' should be multiplied by the corresponding 
+# value in the third array.
 
-# A <- array(1:20, c(5, 2, 2))
-# B <- array(1:20, c(5, 2, 2))
-
-# D <- Apply(data = list(A, B), 
-#            target_dims = list(c(1: length(dim(A))), c(1: length(dim(B)))),
-#            fun = process_arrays)$output1
+multiply_data <- Apply( data = list(arr1, arr2), 
+                        target_dims = list( c('time', 'lat', 'lon'), c('lat', 'lon') ),
+                        fun = multiplyTwoArrays,
+                        guess_dim_names = FALSE
+                      )$output1
 
 
+# c) For each time step, the area average is computed (using the mean() 
+# function, to which the additional parameters in '...' are forwarded).
 
+average_data <- Apply( data = list(arr1, arr2), 
+                        target_dims = list( c('time', 'lat', 'lon'), c('lat', 'lon') ),
+                        fun = averageTwoArrays,
+                        guess_dim_names = FALSE
+                      )$output1
 
+# d) If revert_order == TRUE, b) should be performed before a).
 
-time <- 1:10
-lat <- 1:20
-lon <- 1:30
-
-# Create an array with named dimensions
-multi_index_array <- array(0, dim = c(length(time), length(lat), length(lon)),
-                           dimnames = list(time = as.character(time),
-                                           lat = as.character(lat),
-                                           lon = as.character(lon)))
+average_data <- Apply( data = list(arr1, arr2), 
+                        target_dims = list( c('time', 'lat', 'lon'), c('lat', 'lon') ),
+                        fun = averageTwoArrays,
+                        guess_dim_names = FALSE
+                      )$output1
