@@ -3,4 +3,3 @@ script:
   - git push github main
 only:
   - main
-
