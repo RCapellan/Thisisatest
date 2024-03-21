@@ -1,5 +1,5 @@
 script:
-  - git remote add github https://rcapella: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@github.com/RCapellan/Thisisatest
+  - git remote add github git@github.com:RCapellan/Thisisatest.git
   - git push github main
 only:
   - main
