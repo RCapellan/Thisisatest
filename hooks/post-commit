@@ -5,3 +5,5 @@ GITHUB_REPO="git@github.com:harmonize-tools/template_githubpage.git" # CHANGE TH
 
 # Push changes to the GitHub repository
 git push "$GITHUB_REPO" main
+
+##
