@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the GitHub repository URL
-GITHUB_REPO="git@github.com:user/repo.git" # CHANGE THIS LINE WITH YOUR USER AND YOUR LINK TO YOUR REPOSITORY
+GITHUB_REPO="https://github.com/RCapellan/template_harmonize_githubpage.git"
 
 # Push changes to the GitHub repository
 git push "$GITHUB_REPO" main
