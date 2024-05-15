@@ -1,0 +1,6 @@
+#!/bin/bash
+
+GITHUB_REPO="https://github.com/harmonize-tools/template_githubpage.git"
+
+# Push changes to the GitHub repository
+git push "$GITHUB_REPO" main
